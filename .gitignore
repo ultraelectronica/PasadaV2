@@ -1,15 +1,58 @@
+# ======= Android & Gradle =======
 *.iml
-.gradle
+.gradle/
 /local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
 local.properties
+/build/
+/captures/
+.externalNativeBuild/
+.cxx/
+/app/build/
+/app/release/
+/app/debug/
+*.apk
+*.ap_
+*.aab
+*.dex
+*.class
+
+# ======= IntelliJ / Android Studio IDE =======
+.idea/*
+!.idea/vcs.xml
+!.idea/codeStyles/
+!.idea/dictionaries/
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+*.iws
+*.ipr
+
+# ======= Windows & Mac OS =======
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ======= Log files =======
+*.log
+hs_err_pid*
+crashlytics-build.properties
+
+# ======= Environment Variables & Secrets (CRITICAL) =======
+# Prevents crucial SpringBoot API keys, Supabase URLs/Keys, and internal credentials from leaking
+.env
+.env.*
+!.env.example
+secrets.properties
+*.keystore
+*.jks
+google-services.json
+supabase-config.json
+spring-boot-keys.json
+test-credentials.json
+
+# ======= Other build directories =======
+/bin/
+/out/
