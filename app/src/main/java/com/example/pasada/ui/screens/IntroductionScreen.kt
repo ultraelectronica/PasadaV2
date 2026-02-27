@@ -43,6 +43,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.example.pasada.ui.theme.ReadexProFontFamily
 import java.time.LocalTime
 
 @Composable
@@ -112,11 +113,11 @@ fun IntroductionScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(backgroundGradient)
-                .padding(innerPadding)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .padding(innerPadding)
                     .padding(horizontal = 32.dp, vertical = 24.dp),
                 verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -135,7 +136,7 @@ fun IntroductionScreen(
                         fontSize = 56.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = Color(0xFFF5F5F5),
-                        fontFamily = FontFamily.SansSerif,
+                        fontFamily = ReadexProFontFamily,
                         lineHeight = 61.6.sp,
                         letterSpacing = (-1.0).sp,
                         textAlign = TextAlign.Center
@@ -146,7 +147,7 @@ fun IntroductionScreen(
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Normal,
                         color = Color(0xFFE0E0E0),
-                        fontFamily = FontFamily.SansSerif,
+                        fontFamily = ReadexProFontFamily,
                         letterSpacing = 0.2.sp,
                         textAlign = TextAlign.Center
                     )
