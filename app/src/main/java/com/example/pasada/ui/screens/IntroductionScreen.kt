@@ -1,73 +1,66 @@
 package com.example.pasada.ui.screens
 
+import android.app.Activity
 import android.Manifest
 import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import com.lottiefiles.dotlottie.core.compose.ui.DotLottieAnimation
+import com.lottiefiles.dotlottie.core.util.DotLottieSource
 import com.example.pasada.ui.components.PasadaAlertDialog
-import com.example.pasada.ui.theme.ReadexProFontFamily
-import com.example.pasada.ui.theme.PasadaPrimary
-import com.example.pasada.ui.theme.PasadaSecondary
-import com.example.pasada.ui.theme.PasadaTextLight
-import com.example.pasada.ui.theme.PasadaTextDim
-import com.example.pasada.ui.theme.PasadaTransparentWhite
-import com.example.pasada.ui.theme.PasadaBorderWhite
+import com.example.pasada.ui.theme.*
 import java.time.LocalTime
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IntroductionScreen(
-    onLoginClick: () -> Unit,
-    onCreateAccountClick: () -> Unit
+    onLoginSuccess: () -> Unit,
+    onSignUpSuccess: () -> Unit
 ) {
+    var showLoginSheet by remember { mutableStateOf(false) }
+    var showSignUpSheet by remember { mutableStateOf(false) }
+
     val currentHour = LocalTime.now().hour
     val backgroundGradient = remember(currentHour) {
-        when (currentHour) {
-            in 5..11 -> Brush.verticalGradient(listOf(Color(0xFF236078), Color(0xFF439464)))
-            in 12..17 -> Brush.verticalGradient(listOf(Color(0xFFCFA425), Color(0xFF26AB37)))
-            in 18..21 -> Brush.verticalGradient(listOf(Color(0xFFB45F4F), Color(0xFF705776)))
-            else -> Brush.verticalGradient(listOf(Color(0xFF2E3B4E), Color(0xFF1C1F2E)))
+        val topColor = when (currentHour) {
+            in 5..11 -> Color(0xFF5baa7a)
+            in 12..17 -> Color(0xFF3fb84f)
+            in 18..21 -> Color(0xFF85708a)
+            else -> Color(0xFF2a2d3a)
         }
+        val bottomColor = when (currentHour) {
+            in 5..11 -> Color(0xFF439464)
+            in 12..17 -> Color(0xFF26AB37)
+            in 18..21 -> Color(0xFF705776)
+            else -> Color(0xFF1C1F2E)
+        }
+        Brush.verticalGradient(
+            0.0f to topColor,
+            1.0f to bottomColor
+        )
     }
 
     val animationValue = remember { Animatable(0f) }
@@ -188,54 +181,69 @@ fun IntroductionScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(horizontal = 32.dp, vertical = 24.dp),
+                    .padding(innerPadding),
                 verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(modifier = Modifier.weight(1f))
-                
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.graphicsLayer {
-                        alpha = animationValue.value
-                        translationY = size.height * 0.3f * (1f - animationValue.value)
-                    }
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "Kumusta!",
-                        fontSize = 56.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = PasadaTextLight,
-                        fontFamily = ReadexProFontFamily,
-                        lineHeight = 61.6.sp,
-                        letterSpacing = (-1.0).sp,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "Sakay ka na, boss!",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Normal,
-                        color = PasadaTextDim,
-                        fontFamily = ReadexProFontFamily,
-                        letterSpacing = 0.2.sp,
-                        textAlign = TextAlign.Center
-                    )
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 32.dp)
+                            .graphicsLayer {
+                                alpha = animationValue.value
+                                translationY = 24f * (1f - animationValue.value)
+                            }
+                    ) {
+                        DotLottieAnimation(
+                            source = DotLottieSource.Url("https://lottie.host/9d31fd2d-8b80-4fcc-8fd4-ca885c836dbf/P3eBf6g6Ms.lottie"),
+                            autoplay = true,
+                            loop = true,
+                            speed = 3f,
+                            useFrameInterpolation = false,
+                            modifier = Modifier.background(Color.Transparent)
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Kumusta!",
+                            fontSize = 56.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color(0xFFF5F5F5),
+                            fontFamily = ReadexProFontFamily,
+                            lineHeight = 61.6.sp,
+                            letterSpacing = (-1.0).sp,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Sakay ka na, boss!",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = Color(0xFFF5F5F5),
+                            fontFamily = ReadexProFontFamily,
+                            letterSpacing = 0.2.sp,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
-                
-                Spacer(modifier = Modifier.weight(1f))
 
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(horizontal = 32.dp, vertical = 24.dp)
                         .graphicsLayer {
                             alpha = animationValue.value
-                            translationY = size.height * 0.3f * (1f - animationValue.value)
+                            translationY = 24f * (1f - animationValue.value)
                         }
                 ) {
                     Button(
-                        onClick = onLoginClick,
+                        onClick = { showLoginSheet = true },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = PasadaPrimary,
                             contentColor = Color.White
@@ -251,11 +259,9 @@ fun IntroductionScreen(
                             fontWeight = FontWeight.SemiBold
                         )
                     }
-                    
                     Spacer(modifier = Modifier.height(16.dp))
-                    
                     Button(
-                        onClick = onCreateAccountClick,
+                        onClick = { showSignUpSheet = true },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = PasadaTransparentWhite,
                             contentColor = PasadaTextLight
@@ -277,11 +283,46 @@ fun IntroductionScreen(
                             fontWeight = FontWeight.SemiBold
                         )
                     }
-                    
                     Spacer(modifier = Modifier.height(24.dp))
                 }
             }
         }
     }
-}
 
+    if (showLoginSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showLoginSheet = false },
+            containerColor = Color(0xFF121212),
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+        ) {
+            LoginScreen(
+                onNavigateBack = { showLoginSheet = false },
+                onLoginSuccess = onLoginSuccess,
+                onNavigateToForgotPassword = { /* TODO */ },
+                onNavigateToSignUp = {
+                    showLoginSheet = false
+                    showSignUpSheet = true
+                }
+            )
+        }
+    }
+
+    if (showSignUpSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showSignUpSheet = false },
+            containerColor = Color(0xFF121212),
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+        ) {
+            SignUpScreen(
+                onNavigateBack = { showSignUpSheet = false },
+                onSignUpSuccess = onSignUpSuccess,
+                onNavigateToLogin = {
+                    showSignUpSheet = false
+                    showLoginSheet = true
+                }
+            )
+        }
+    }
+}

@@ -1,8 +1,8 @@
 package com.example.pasada.ui
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
@@ -20,19 +20,33 @@ fun PasadaApp() {
         startDestination = "introduction",
         modifier = Modifier.fillMaxSize()
     ) {
-        composable("introduction") {
+        composable(
+            route = "introduction",
+            enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(500)) },
+            exitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(500)) },
+            popEnterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(500)) },
+            popExitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(500)) }
+        ) {
             IntroductionScreen(
-                onLoginClick = { navController.navigate("loginAccount") },
-                onCreateAccountClick = { navController.navigate("createAccount") }
+                onLoginSuccess = { 
+                    navController.navigate("home") {
+                        popUpTo("introduction") { inclusive = true }
+                    }
+                },
+                onSignUpSuccess = { 
+                    navController.navigate("home") {
+                        popUpTo("introduction") { inclusive = true }
+                    }
+                }
             )
         }
-        composable("loginAccount") {
-            Greeting(name = "Login Screen Placeholder")
-        }
-        composable("createAccount") {
-            Greeting(name = "Create Account Placeholder")
-        }
-        composable("home") {
+        composable(
+            route = "home",
+            enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(500)) },
+            exitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(500)) },
+            popEnterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(500)) },
+            popExitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(500)) }
+        ) {
             Greeting(name = "Pasada User")
         }
     }

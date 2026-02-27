@@ -12,6 +12,10 @@ val PasadaWarningText = Color(0xFFE65100)
 val PasadaTransparentWhite = Color(0x1EFFFFFF) // 0.12 opacity white
 val PasadaBorderWhite = Color(0x4DFFFFFF) // 0.3 opacity white
 
+val PasadaLimeGreen = Color(0xFFD9FF5F)
+val PasadaDarkBg = Color(0xFF000000)
+val PasadaSurfaceBg = Color(0xFF1C1C1E)
+
 val Purple80 = Color(0xFFD0BCFF)
 val PurpleGrey80 = Color(0xFFCCC2DC)
 val Pink80 = Color(0xFFEFB8C8)
