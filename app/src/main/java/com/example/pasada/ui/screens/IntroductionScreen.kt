@@ -8,6 +8,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -22,14 +23,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import com.lottiefiles.dotlottie.core.compose.ui.DotLottieAnimation
-import com.lottiefiles.dotlottie.core.util.DotLottieSource
 import com.example.pasada.ui.components.PasadaAlertDialog
 import com.example.pasada.ui.theme.*
 import java.time.LocalTime
@@ -44,6 +45,14 @@ fun IntroductionScreen(
     var showSignUpSheet by remember { mutableStateOf(false) }
 
     val currentHour = LocalTime.now().hour
+    val timeIcon = remember(currentHour) {
+        when (currentHour) {
+            in 5..11 -> com.example.pasada.R.drawable.sunrise
+            in 12..17 -> com.example.pasada.R.drawable.sunny
+            in 18..21 -> com.example.pasada.R.drawable.sunset
+            else -> com.example.pasada.R.drawable.moon
+        }
+    }
     val backgroundGradient = remember(currentHour) {
         val topColor = when (currentHour) {
             in 5..11 -> Color(0xFF5baa7a)
@@ -201,13 +210,13 @@ fun IntroductionScreen(
                                 translationY = 24f * (1f - animationValue.value)
                             }
                     ) {
-                        DotLottieAnimation(
-                            source = DotLottieSource.Url("https://lottie.host/9d31fd2d-8b80-4fcc-8fd4-ca885c836dbf/P3eBf6g6Ms.lottie"),
-                            autoplay = true,
-                            loop = true,
-                            speed = 3f,
-                            useFrameInterpolation = false,
-                            modifier = Modifier.background(Color.Transparent)
+                        Image(
+                            painter = painterResource(id = timeIcon),
+                            contentDescription = "Time of day icon",
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .size(200.dp)
+                                .background(Color.Transparent)
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
