@@ -43,7 +43,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import com.example.pasada.ui.components.PasadaAlertDialog
 import com.example.pasada.ui.theme.ReadexProFontFamily
+import com.example.pasada.ui.theme.PasadaPrimary
+import com.example.pasada.ui.theme.PasadaSecondary
+import com.example.pasada.ui.theme.PasadaTextLight
+import com.example.pasada.ui.theme.PasadaTextDim
+import com.example.pasada.ui.theme.PasadaTransparentWhite
+import com.example.pasada.ui.theme.PasadaBorderWhite
 import java.time.LocalTime
 
 @Composable
@@ -77,6 +86,31 @@ fun IntroductionScreen(
     var locationAskedOnce by remember { mutableStateOf(false) }
     val context = LocalContext.current
     
+    val backgroundLocationLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = {
+            showLocationDialog = false
+        }
+    )
+
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+        onResult = { permissions ->
+            val granted = permissions.values.any { it }
+            if (granted && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                val hasBg = ContextCompat.checkSelfPermission(
+                    context, 
+                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+                if (!hasBg) {
+                    backgroundLocationLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                    return@rememberLauncherForActivityResult
+                }
+            }
+            showLocationDialog = false
+        }
+    )
+    
     LaunchedEffect(Unit) {
         if (!locationAskedOnce) {
             val hasFineLocation = ContextCompat.checkSelfPermission(
@@ -89,7 +123,16 @@ fun IntroductionScreen(
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
             
-            if (!hasFineLocation && !hasCoarseLocation) {
+            val hasBackgroundLocation = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                ContextCompat.checkSelfPermission(
+                    context, 
+                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            } else {
+                true
+            }
+            
+            if (!hasFineLocation && !hasCoarseLocation || !hasBackgroundLocation) {
                 showLocationDialog = true
             }
             locationAskedOnce = true
@@ -97,11 +140,39 @@ fun IntroductionScreen(
     }
 
     if (showLocationDialog) {
-        LocationAlertDialog(
+        PasadaAlertDialog(
+            title = "Location Access",
+            message = "This app needs location access (including in the background) to pinpoint pickup points, find nearby drivers effectively, and update your ride status.",
+            icon = Icons.Default.LocationOn,
+            iconContentDescription = "Location Access",
+            confirmText = "Allow",
+            dismissText = "Cancel",
+            onConfirm = {
+                val hasFineLocation = ContextCompat.checkSelfPermission(
+                    context, 
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+                
+                val hasCoarseLocation = ContextCompat.checkSelfPermission(
+                    context, 
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+                
+                if (!hasFineLocation && !hasCoarseLocation) {
+                    locationPermissionLauncher.launch(
+                        arrayOf(
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        )
+                    )
+                } else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                    backgroundLocationLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                } else {
+                    showLocationDialog = false
+                }
+            },
             onDismiss = { showLocationDialog = false },
-            onAllow = {
-                showLocationDialog = false
-            }
+            warningBoxText = "Background location access is required to track ongoing rides and driver matching."
         )
     }
 
@@ -135,7 +206,7 @@ fun IntroductionScreen(
                         text = "Kumusta!",
                         fontSize = 56.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        color = Color(0xFFF5F5F5),
+                        color = PasadaTextLight,
                         fontFamily = ReadexProFontFamily,
                         lineHeight = 61.6.sp,
                         letterSpacing = (-1.0).sp,
@@ -146,7 +217,7 @@ fun IntroductionScreen(
                         text = "Sakay ka na, boss!",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Normal,
-                        color = Color(0xFFE0E0E0),
+                        color = PasadaTextDim,
                         fontFamily = ReadexProFontFamily,
                         letterSpacing = 0.2.sp,
                         textAlign = TextAlign.Center
@@ -166,7 +237,7 @@ fun IntroductionScreen(
                     Button(
                         onClick = onLoginClick,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF00CC58),
+                            containerColor = PasadaPrimary,
                             contentColor = Color.White
                         ),
                         modifier = Modifier
@@ -186,15 +257,15 @@ fun IntroductionScreen(
                     Button(
                         onClick = onCreateAccountClick,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.White.copy(alpha = 0.12f),
-                            contentColor = Color(0xFFF5F5F5)
+                            containerColor = PasadaTransparentWhite,
+                            contentColor = PasadaTextLight
                         ),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp)
                             .border(
                                 width = 1.5.dp,
-                                color = Color.White.copy(alpha = 0.3f),
+                                color = PasadaBorderWhite,
                                 shape = RoundedCornerShape(14.dp)
                             ),
                         shape = RoundedCornerShape(14.dp),
@@ -214,59 +285,3 @@ fun IntroductionScreen(
     }
 }
 
-@Composable
-private fun LocationAlertDialog(
-    onDismiss: () -> Unit,
-    onAllow: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        icon = { Icon(Icons.Default.LocationOn, contentDescription = "Location Access") },
-        title = {
-            Text(
-                text = "Location Access",
-                fontWeight = FontWeight.Bold
-            )
-        },
-        text = {
-            Column {
-                Text(
-                    text = "This app needs location access to pinpoint your pickup points and find nearby drivers effectively."
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            Color(0xFFFFF3E0),
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        .padding(12.dp)
-                ) {
-                    Text(
-                        text = "Location access is required for rides.",
-                        color = Color(0xFFE65100),
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = onAllow,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00CC58))
-            ) {
-                Text("Allow")
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = onDismiss,
-                colors = ButtonDefaults.textButtonColors(contentColor = Color.Gray)
-            ) {
-                Text("Cancel")
-            }
-        }
-    )
-}
