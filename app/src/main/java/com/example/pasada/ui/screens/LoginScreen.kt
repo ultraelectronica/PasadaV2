@@ -5,8 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -141,9 +140,9 @@ fun LoginScreen(
             onClick = { /* Handle Google Sign In */ },
             icon = {
                 Icon(
-                    imageVector = Icons.Default.AccountCircle,
+                    painter = painterResource(id = com.example.pasada.R.drawable.google_icon),
                     contentDescription = "Google",
-                    tint = Color.White
+                    tint = Color.Unspecified
                 )
             }
         )

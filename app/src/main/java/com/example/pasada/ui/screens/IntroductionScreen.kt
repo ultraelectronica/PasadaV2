@@ -43,6 +43,7 @@ fun IntroductionScreen(
 ) {
     var showLoginSheet by remember { mutableStateOf(false) }
     var showSignUpSheet by remember { mutableStateOf(false) }
+    var signUpStep by remember { mutableIntStateOf(1) }
 
     val currentHour = LocalTime.now().hour
     val timeIcon = remember(currentHour) {
@@ -319,16 +320,29 @@ fun IntroductionScreen(
 
     if (showSignUpSheet) {
         ModalBottomSheet(
-            onDismissRequest = { showSignUpSheet = false },
+            onDismissRequest = { 
+                showSignUpSheet = false 
+                signUpStep = 1
+            },
             containerColor = Color(0xFF121212),
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
             shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
         ) {
             SignUpScreen(
-                onNavigateBack = { showSignUpSheet = false },
+                currentStep = signUpStep,
+                onStepChange = { signUpStep = it },
+                onNavigateBack = { 
+                    if (signUpStep == 2) {
+                        signUpStep = 1
+                    } else {
+                        showSignUpSheet = false 
+                        signUpStep = 1
+                    }
+                },
                 onSignUpSuccess = onSignUpSuccess,
                 onNavigateToLogin = {
                     showSignUpSheet = false
+                    signUpStep = 1
                     showLoginSheet = true
                 }
             )
