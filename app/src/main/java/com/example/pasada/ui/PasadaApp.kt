@@ -15,27 +15,25 @@ import com.example.pasada.ui.screens.IntroductionScreen
 fun PasadaApp() {
     val navController = rememberNavController()
     
-    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-        NavHost(
-            navController = navController,
-            startDestination = "introduction",
-            modifier = Modifier.padding(innerPadding)
-        ) {
-            composable("introduction") {
-                IntroductionScreen(
-                    onLoginClick = { navController.navigate("loginAccount") },
-                    onCreateAccountClick = { navController.navigate("createAccount") }
-                )
-            }
-            composable("loginAccount") {
-                Greeting(name = "Login Screen Placeholder")
-            }
-            composable("createAccount") {
-                Greeting(name = "Create Account Placeholder")
-            }
-            composable("home") {
-                Greeting(name = "Pasada User")
-            }
+    NavHost(
+        navController = navController,
+        startDestination = "introduction",
+        modifier = Modifier.fillMaxSize()
+    ) {
+        composable("introduction") {
+            IntroductionScreen(
+                onLoginClick = { navController.navigate("loginAccount") },
+                onCreateAccountClick = { navController.navigate("createAccount") }
+            )
+        }
+        composable("loginAccount") {
+            Greeting(name = "Login Screen Placeholder")
+        }
+        composable("createAccount") {
+            Greeting(name = "Create Account Placeholder")
+        }
+        composable("home") {
+            Greeting(name = "Pasada User")
         }
     }
 }
