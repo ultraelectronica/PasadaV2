@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.pasada.Greeting
+import com.example.pasada.ui.screens.IntroductionScreen
 
 @Composable
 fun PasadaApp() {
@@ -17,9 +18,21 @@ fun PasadaApp() {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "home",
+            startDestination = "introduction",
             modifier = Modifier.padding(innerPadding)
         ) {
+            composable("introduction") {
+                IntroductionScreen(
+                    onLoginClick = { navController.navigate("loginAccount") },
+                    onCreateAccountClick = { navController.navigate("createAccount") }
+                )
+            }
+            composable("loginAccount") {
+                Greeting(name = "Login Screen Placeholder")
+            }
+            composable("createAccount") {
+                Greeting(name = "Create Account Placeholder")
+            }
             composable("home") {
                 Greeting(name = "Pasada User")
             }
