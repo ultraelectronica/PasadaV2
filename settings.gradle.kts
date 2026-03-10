@@ -23,5 +23,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Pasada"
+rootProject.name = "Para!"
 include(":app")

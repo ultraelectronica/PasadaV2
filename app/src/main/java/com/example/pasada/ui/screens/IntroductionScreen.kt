@@ -1,6 +1,5 @@
 package com.example.pasada.ui.screens
 
-import android.app.Activity
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -22,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -33,16 +31,22 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.example.pasada.ui.components.PasadaAlertDialog
 import com.example.pasada.ui.theme.*
+import com.example.pasada.ui.viewmodel.AuthUiState
 import java.time.LocalTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IntroductionScreen(
+    authUiState: AuthUiState,
+    onSignIn: (email: String, password: String) -> Unit,
+    onSignUp: (email: String, password: String) -> Unit,
+    onClearError: () -> Unit,
     onLoginSuccess: () -> Unit,
     onSignUpSuccess: () -> Unit
 ) {
     var showLoginSheet by remember { mutableStateOf(false) }
     var showSignUpSheet by remember { mutableStateOf(false) }
+    var signUpStep by remember { mutableIntStateOf(1) }
 
     val currentHour = LocalTime.now().hour
     val timeIcon = remember(currentHour) {
@@ -300,17 +304,27 @@ fun IntroductionScreen(
 
     if (showLoginSheet) {
         ModalBottomSheet(
-            onDismissRequest = { showLoginSheet = false },
+            onDismissRequest = {
+                showLoginSheet = false
+                onClearError()
+            },
             containerColor = Color(0xFF121212),
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
             shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
         ) {
             LoginScreen(
-                onNavigateBack = { showLoginSheet = false },
+                authUiState = authUiState,
+                onSignIn = onSignIn,
+                onClearError = onClearError,
+                onNavigateBack = {
+                    showLoginSheet = false
+                    onClearError()
+                },
                 onLoginSuccess = onLoginSuccess,
                 onNavigateToForgotPassword = { /* TODO */ },
                 onNavigateToSignUp = {
                     showLoginSheet = false
+                    onClearError()
                     showSignUpSheet = true
                 }
             )
@@ -319,16 +333,35 @@ fun IntroductionScreen(
 
     if (showSignUpSheet) {
         ModalBottomSheet(
-            onDismissRequest = { showSignUpSheet = false },
+            onDismissRequest = { 
+                showSignUpSheet = false 
+                signUpStep = 1
+                onClearError()
+            },
             containerColor = Color(0xFF121212),
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
             shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
         ) {
             SignUpScreen(
-                onNavigateBack = { showSignUpSheet = false },
+                authUiState = authUiState,
+                onSignUp = onSignUp,
+                onClearError = onClearError,
+                currentStep = signUpStep,
+                onStepChange = { signUpStep = it },
+                onNavigateBack = { 
+                    if (signUpStep == 2) {
+                        signUpStep = 1
+                    } else {
+                        showSignUpSheet = false 
+                        signUpStep = 1
+                        onClearError()
+                    }
+                },
                 onSignUpSuccess = onSignUpSuccess,
                 onNavigateToLogin = {
                     showSignUpSheet = false
+                    signUpStep = 1
+                    onClearError()
                     showLoginSheet = true
                 }
             )
