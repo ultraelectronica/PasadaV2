@@ -47,7 +47,7 @@ fun PasadaApp() {
             popEnterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(500)) },
             popExitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(500)) }
         ) {
-            Greeting(name = "Pasada User")
+            Greeting(name = "Para! User")
         }
     }
 }

@@ -312,7 +312,7 @@ private fun StepTwoContent(
             )
             Text(
                 text = buildAnnotatedString {
-                    append("I agree to Pasada's ")
+                    append("I agree to Para!'s ")
                     withStyle(style = SpanStyle(color = PasadaPrimary, fontWeight = FontWeight.SemiBold)) {
                         append("Terms and Conditions")
                     }
