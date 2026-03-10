@@ -24,9 +24,13 @@ import com.example.pasada.ui.components.*
 import com.example.pasada.ui.theme.PasadaPrimary
 import com.example.pasada.ui.theme.PasadaTextDim
 import com.example.pasada.ui.theme.ReadexProFontFamily
+import com.example.pasada.ui.viewmodel.AuthUiState
 
 @Composable
 fun LoginScreen(
+    authUiState: AuthUiState,
+    onSignIn: (email: String, password: String) -> Unit,
+    onClearError: () -> Unit,
     onNavigateBack: () -> Unit,
     onLoginSuccess: () -> Unit,
     onNavigateToForgotPassword: () -> Unit,
@@ -36,7 +40,10 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
     var rememberMe by remember { mutableStateOf(false) }
-    var isLoading by remember { mutableStateOf(false) }
+
+    LaunchedEffect(authUiState.isAuthenticated) {
+        if (authUiState.isAuthenticated) onLoginSuccess()
+    }
 
     Column(
         modifier = Modifier
@@ -121,12 +128,26 @@ fun LoginScreen(
             )
         }
 
+        if (authUiState.errorMessage != null) {
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = authUiState.errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 13.sp,
+                fontFamily = ReadexProFontFamily
+            )
+        }
+
         Spacer(modifier = Modifier.height(32.dp))
 
         AuthPrimaryButton(
             text = "Log In",
-            onClick = { onLoginSuccess() },
-            isLoading = isLoading
+            onClick = {
+                onClearError()
+                onSignIn(email, password)
+            },
+            isLoading = authUiState.isLoading,
+            enabled = email.isNotBlank() && password.isNotBlank()
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -137,7 +158,7 @@ fun LoginScreen(
 
         AuthSocialButton(
             text = "Continue with Google",
-            onClick = { /* Handle Google Sign In */ },
+            onClick = { /* TODO: Google Sign In */ },
             icon = {
                 Icon(
                     painter = painterResource(id = com.example.pasada.R.drawable.google_icon),

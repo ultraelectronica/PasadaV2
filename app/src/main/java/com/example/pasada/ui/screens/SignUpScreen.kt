@@ -27,9 +27,13 @@ import com.example.pasada.ui.components.*
 import com.example.pasada.ui.theme.PasadaPrimary
 import com.example.pasada.ui.theme.PasadaTextDim
 import com.example.pasada.ui.theme.ReadexProFontFamily
+import com.example.pasada.ui.viewmodel.AuthUiState
 
 @Composable
 fun SignUpScreen(
+    authUiState: AuthUiState,
+    onSignUp: (email: String, password: String) -> Unit,
+    onClearError: () -> Unit,
     currentStep: Int = 1,
     onStepChange: (Int) -> Unit = {},
     onNavigateBack: () -> Unit,
@@ -42,20 +46,8 @@ fun SignUpScreen(
         step = currentStep
     }
 
-    val animatedAlpha = remember { Animatable(1f) }
-    val animatedOffset = remember { Animatable(0f) }
-
-    LaunchedEffect(step) {
-        animatedAlpha.snapTo(0f)
-        animatedOffset.snapTo(50f)
-        animatedAlpha.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(300)
-        )
-        animatedOffset.animateTo(
-            targetValue = 0f,
-            animationSpec = tween(300)
-        )
+    LaunchedEffect(authUiState.isAuthenticated) {
+        if (authUiState.isAuthenticated) onSignUpSuccess()
     }
 
     var email by remember { mutableStateOf("") }
@@ -67,7 +59,6 @@ fun SignUpScreen(
     var agreedToTerms by remember { mutableStateOf(false) }
 
     var isPasswordVisible by remember { mutableStateOf(false) }
-    var isLoading by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -108,9 +99,10 @@ fun SignUpScreen(
                     },
                     onGoogleClick = { },
                     onNavigateToLogin = onNavigateToLogin,
-                    isContinueEnabled = email.isNotEmpty() && password.isNotEmpty() && password == confirmPassword
+                    isContinueEnabled = email.isNotBlank() && password.isNotBlank() && password == confirmPassword
                 )
                 2 -> StepTwoContent(
+                    authUiState = authUiState,
                     fullName = fullName,
                     onFullNameChange = { fullName = it },
                     contactNumber = contactNumber,
@@ -121,9 +113,11 @@ fun SignUpScreen(
                         step = 1
                         onStepChange(1)
                     },
-                    onCreateAccount = { onSignUpSuccess() },
-                    isLoading = isLoading,
-                    isCreateEnabled = fullName.isNotEmpty() && contactNumber.isNotEmpty() && agreedToTerms
+                    onCreateAccount = {
+                        onClearError()
+                        onSignUp(email, password)
+                    },
+                    isCreateEnabled = fullName.isNotBlank() && contactNumber.isNotBlank() && agreedToTerms
                 )
             }
         }
@@ -255,6 +249,7 @@ private fun StepOneContent(
 
 @Composable
 private fun StepTwoContent(
+    authUiState: AuthUiState,
     fullName: String,
     onFullNameChange: (String) -> Unit,
     contactNumber: String,
@@ -263,7 +258,6 @@ private fun StepTwoContent(
     onAgreedToTermsChange: (Boolean) -> Unit,
     onBack: () -> Unit,
     onCreateAccount: () -> Unit,
-    isLoading: Boolean,
     isCreateEnabled: Boolean
 ) {
     Column {
@@ -328,12 +322,22 @@ private fun StepTwoContent(
             )
         }
 
+        if (authUiState.errorMessage != null) {
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = authUiState.errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 13.sp,
+                fontFamily = ReadexProFontFamily
+            )
+        }
+
         Spacer(modifier = Modifier.height(32.dp))
 
         AuthPrimaryButton(
             text = "Create Account",
             onClick = onCreateAccount,
-            isLoading = isLoading,
+            isLoading = authUiState.isLoading,
             enabled = isCreateEnabled
         )
 
